@@ -32,6 +32,7 @@ def make_parser(parser=None):
     parser.add_argument("--xlim", type=float, nargs=2, default=None, help="Restrict x axis to this range")
     parser.add_argument("--constrainMass", action='store_true', help="Constrain mass parameter in the fit (e.g. for ptll fit)")
     parser.add_argument("--unfold", action='store_true', help="Prepare datacard for unfolding")
+    parser.add_argument("--asymow", action='store_true', help="Prepare datacard for asymow")
     parser.add_argument("--fitXsec", action='store_true', help="Fit signal inclusive cross section")
     
     return parser
@@ -65,7 +66,10 @@ def main(args,xnorm=False):
 
     if wmass:
         name = "WMass"
-        datagroups.setGenAxes(["etaGen","ptGen"])
+        if args.asymow:
+            datagroups.setGenAxes(["ptVgen","absYVgen"])
+        else:
+            datagroups.setGenAxes(["etaGen","ptGen"])
     elif wlike:
         name = "ZMassWLike"
         datagroups.setGenAxes(["qGen","etaGen","ptGen"])
@@ -84,13 +88,13 @@ def main(args,xnorm=False):
 
     templateDir = f"{scriptdir}/Templates/WMass"
 
-    if args.unfold and args.fitXsec:
-        raise ValueError("Options --unfolding and --fitXsec are incompatible. Please choose one or the other")
+    if (args.unfold or args.asymow) and args.fitXsec:
+        raise ValueError("Options --unfolding/--asymow and --fitXsec are incompatible. Please choose one or the other")
     elif args.fitXsec:
         datagroups.unconstrainedProcesses.append("Wmunu" if wmass else "Zmumu")
-    elif args.unfold:
+    elif (args.unfold or args.asymow):
         if not args.constrainMass:
-            logger.warning("Unfolding is specified but the mass is treated free floating, to constrain the mass add '--constrainMass'")
+            logger.warning("Unfolding/Asymow is specified but the mass is treated free floating, to constrain the mass add '--constrainMass'")
 
         if wmass:
             # split group into two
@@ -98,7 +102,7 @@ def main(args,xnorm=False):
             datagroups.copyGroup("Wmunu", "Wmunu_qGen1", member_filter=lambda x: "Wplusmunu" in x.name)
 
             datagroups.deleteGroup("Wmunu")
-
+      
             datagroups.defineSignalBinsUnfolding("Wmunu_qGen0")
             datagroups.defineSignalBinsUnfolding("Wmunu_qGen1")
 
