@@ -212,12 +212,14 @@ class Datagroups(object):
                 logger.debug(f"Looking at group member {member.name}")
                 scale = group.scale
                 read_syst = syst
+                baseName_pseudoData_ugly = baseName
                 if member.name in forceToNominal:
                     read_syst = ""
+                    baseName_pseudoData_ugly = "nominal"
                     logger.debug(f"Forcing group member {member.name} to read the nominal hist for syst {syst}")
 
                 try:
-                    h = self.readHist(baseName, member, procName, read_syst, scaleOp=scale, forceNonzero=forceNonzero, scaleToNewLumi=scaleToNewLumi)
+                    h = self.readHist(baseName_pseudoData_ugly, member, procName, read_syst, scaleOp=scale, forceNonzero=forceNonzero, scaleToNewLumi=scaleToNewLumi)
                     foundExact = True
                 except ValueError as e:
                     if nominalIfMissing:
@@ -514,6 +516,9 @@ class Datagroups(object):
     def readHist(self, baseName, proc, group, syst, scaleOp=None, forceNonzero=True, scaleToNewLumi=-1):
         output = self.results[proc.name]["output"]
         histname = self.histName(baseName, proc.name, syst)
+        logger.error(f"baseNmae = {baseName}")
+        logger.error(f"proc.name = {proc.name}")
+        logger.error(f"syst = {syst}")
         logger.debug(f"Reading hist {histname} for proc/group {proc.name}/{group} and syst '{syst}'")
         if histname not in output:
             raise ValueError(f"Histogram {histname} not found for process {proc.name}")

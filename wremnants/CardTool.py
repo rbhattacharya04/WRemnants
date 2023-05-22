@@ -532,12 +532,16 @@ class CardTool(object):
 
     def addPseudodata(self, processes, processesFromNomi=[]):
         datagroups = self.datagroups if not self.pseudodata_datagroups else self.pseudodata_datagroups
+        forceToNominal = [x for x in self.datagroups.getProcNames(["Zmumu","Ztautau"])]
+        #print("forceToNominal = ",forceToNominal)
         datagroups.loadHistsForDatagroups(
             baseName=self.pseudoData, syst="", label=self.pseudoData,
             procsToRead=processes,
-            scaleToNewLumi=self.lumiScale)
+            scaleToNewLumi=self.lumiScale,
+            forceToNominal=forceToNominal)
         procDict = datagroups.getDatagroups()
         hists = [procDict[proc].hists[self.pseudoData] for proc in processes if proc not in processesFromNomi]
+        #hists = [procDict[proc].hists[self.pseudoData] if not proc.startswith("Z") else  procDict[proc].hists["nominal"] for proc in processes if proc not in processesFromNomi ]
         # now add possible processes from nominal
         logger.warning(f"Making pseudodata summing these processes: {processes}")
         if len(processesFromNomi):
@@ -552,9 +556,15 @@ class CardTool(object):
         # done, now sum all histograms
         hdata = hh.sumHists(hists)
         # Kind of hacky, but in case the alt hist has uncertainties
-        for systAxName in ["systIdx", "tensor_axis_0", "vars"]:
+        logger.error(f"Coming before Loop")
+        for systAxName in ["systIdx", "tensor_axis_0", "vars", "massShift"]:
+            logger.error(f"Entering 1st loop")
+            logger.error(f"systAxName = {systAxName}")
+            logger.error(f"hdata.axes = {hdata.axes}")
             if systAxName in [ax.name for ax in hdata.axes]:
+                logger.error(f"1st time = {hdata}")
                 hdata = hdata[{systAxName : self.pseudoDataIdx }] 
+                logger.error(f"2nd time = {hdata}")
         self.writeHist(hdata, self.pseudoData+"_sum")
 
     def writeForProcesses(self, syst, processes, label):

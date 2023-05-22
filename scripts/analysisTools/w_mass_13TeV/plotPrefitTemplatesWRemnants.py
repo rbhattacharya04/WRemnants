@@ -11,6 +11,7 @@ import re
 import os, os.path
 import argparse
 import shutil
+import wremnants
 
 ## safe batch mode
 import sys
@@ -168,6 +169,7 @@ def plotPrefitHistograms(hdata2D, hmc2D, outdir_dataMC, xAxisName, yAxisName,
 
     # plot unrolled ratio to better see how it looks like
     ratio_unrolled = unroll2Dto1D(ratio2D, newname=f"{ratio2D.GetName()}_unrolled")
+    ROOT.wrem.setRootHistogramError(ratio_unrolled, 0.0)
     drawSingleTH1(ratio_unrolled, XlabelUnroll, f"{dataTitle}/pred. ratio", "muon_etaPtUnrolledRatio",
                   outdir_dataMC, drawLineLowerPanel="", lowerPanelHeight=0.0, labelRatioTmp="", 
                   passCanvas=canvasWide,
@@ -206,7 +208,8 @@ if __name__ == "__main__":
     parser.add_argument("--pd", "--pseudodata", dest="pseudodata", type=str, default=None, help="Name for pseudodata histogram, to be used instead of x_Data (with no charge postfix, it is added in this script)")
     
     commonargs,_ = parser.parse_known_args()
-    defaultProcs = ["Zmumu", "Ztautau", "Other"] if commonargs.isWlike else ["Wmunu", "Wtaunu", "Zmumu", "Ztautau", "Fake", "Top", "Diboson"]
+    #defaultProcs = ["Zmumu", "Ztautau", "Other"] if commonargs.isWlike else ["Wmunu", "Wtaunu", "Zmumu", "Ztautau", "Fake", "Top", "Diboson"]
+    defaultProcs = ["Wmunu"]    
 
     parser.add_argument("--pp", "--predicted-processes", dest="predictedProcesses", type=str, nargs="*", help="Use these names for predicted processes to make plots", default=defaultProcs)
     parser.add_argument("--xpp", "--exclude-predicted-processes", dest="excludePredictedProcesses", type=str, nargs="*", help="Use these names to exclude predicted processes to make plots", default=[])
