@@ -141,6 +141,7 @@ if __name__ == "__main__":
         quit()
     
     processes = args.processes.split(',')
+    print(processes)
     inputsysts = args.systematics.split(',')
     regexp_syst = re.compile(args.systematics.replace(',','|'))
 
@@ -167,9 +168,11 @@ if __name__ == "__main__":
     
     f = safeOpenFile(fname)
     # get nominals
+    l = "test"
     for p in processes:
         if isWrem:
-            nominals[p] = safeGetObject(f, f"x_{p}_{args.charge}")
+            name = f"x_{p}_{args.charge}" 
+            nominals[p] = safeGetObject(f, name)
         else:
             nominals[p] = safeGetObject(f, f"x_{p}")
         nominals[p].SetTitle(p)
@@ -214,12 +217,17 @@ if __name__ == "__main__":
         if isWrem and not name.endswith(args.charge): continue
         # check name also allowing for perfect matching
         if not any(x in name for x in inputsysts) and not regexp_syst.match(name): continue
-
         if isWrem:
             tokens = name.split("_")
-            pname = f"{tokens[1]}"
+            if ("qGen" in tokens[2]):
+                pname = f"{tokens[1]}_{tokens[2]}_{tokens[3]}_{tokens[4]}"
+            else:
+                pname = f"{tokens[1]}"
             if pname not in processes: continue
-            sname = f"{'_'.join(tokens[2:-1])}"
+            if ("qGen" in tokens[2]):
+                sname = f"{'_'.join(tokens[5:-1])}"
+            else:
+                sname = f"{'_'.join(tokens[2:-1])}"
             systLeg[pname].append(sname)
             sname += f"_{args.charge}"
         else:

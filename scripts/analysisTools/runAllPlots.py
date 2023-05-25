@@ -19,9 +19,9 @@ onlyData = 0 # or set fits = ["Data"]
 fits = ["Asimov", "Data"]
 
 # select what to plot
-skipHistograms = 1 # prefit histograms, can't be made also before running the fit
+skipHistograms = 0 # prefit histograms, can't be made also before running the fit
 skipImpacts = 1
-skipNuisances = 0
+skipNuisances = 1
 skipSystRatios = 1
 skipPostfitHistograms = 1 # prefit and postfit histograms, from fitresults.root
 
@@ -90,6 +90,8 @@ printText("PREFIT HISTOGRAMS")
 command = f"python {scriptDir}w_mass_13TeV/plotPrefitTemplatesWRemnants.py {combineInputFile} {outputPath}/plotPrefitTemplatesWRemnants/"
 if isWlike:
     command += " --wlike"
+print(command)
+print(skipHistograms)
 if not skipHistograms:
     print()
     safeSystem(command, dryRun=dryRun)
