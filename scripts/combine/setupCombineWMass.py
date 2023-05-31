@@ -70,7 +70,8 @@ def main(args,xnorm=False):
     if wmass:
         name = "WMass"
         if args.asymow:
-            datagroups.setGenAxes(["ptVgen","absYVgen"])
+            datagroups.setGenAxes(["ptVgen","absYVgen","helicity"])
+            #datagroups.setGenAxes(["ptVgen","absYVgen"])
         else:
             datagroups.setGenAxes(["etaGen","ptGen"])
     elif wlike:

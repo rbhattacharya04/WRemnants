@@ -41,13 +41,16 @@ class Datagroups(object):
         if datasets:
             self.datasets = {x.name : x for x in datasets}
             logger.debug(f"Getting these datasets: {self.datasets.keys()}")
-
+       
             if self.results:
                 self.data = [x for x in self.datasets.values() if x.is_data]
                 if self.data:
                     self.lumi = sum([self.results[x.name]["lumi"] for x in self.data if x.name in self.results])
                 else:
                     logger.warning("No data process was selected, normalizing MC to to 1/fb")
+
+        self.lumi=16.809083707
+        #for asymow I am doing this in ugly way
 
         self.groups = {}
         self.nominalName = "nominal"
@@ -188,6 +191,7 @@ class Datagroups(object):
         # (usually it will be the case, but it is more difficult to handle in a fully general way and without bugs)
         histForFake = None # to store the data-MC sums used for the fakes, for each syst
         nameFake = "Fake" # TODO: actual name might/should be configurable
+        forceNonzero = False # For now I do it ugly
         if nameFake in procsToRead:
             procsToReadSort = [x for x in procsToRead if x != nameFake] + [nameFake]
             hasFake = True
@@ -232,14 +236,14 @@ class Datagroups(object):
                 ## Some operations are triggered based on the group and some might be specific for fakes,
                 ## in which case they should be exported inside the "if" below, since they wouldn't be run here.
                 ## Might have a function to contain all these operations to avoid code repetition,
-                ## but not all are needed, so we should first assess whether the order is relevant before reshuffling
+                ## but not all are needed, so we should first assess whether the order is relevant before reshuffling               
                 if group.memberOp:
                     if group.memberOp[i] is not None:
                         logger.debug(f"Apply operation to member {i}: {member.name}/{procName}")
                         h = group.memberOp[i](h)
                     else:
                         logger.debug(f"No operation for member {i}: {member.name}/{procName}")
-
+ 
                 if self.gen_axes:
                     # integrate over remaining gen axes 
                     projections = [a for a in h.axes.name if a not in self.gen_axes]
@@ -534,7 +538,7 @@ class Datagroups(object):
         if forceNonzero:
             h = hh.clipNegativeVals(h, createNew=False)
         if scaleToNewLumi > 0:
-            h = hh.scaleHist(h, scaleToNewLumi, createNew=False)                        
+            h = hh.scaleHist(h, scaleToNewLumi, createNew=False) 
         scale = self.processScaleFactor(proc)
         if scaleOp:
             scale = scale*scaleOp(proc)

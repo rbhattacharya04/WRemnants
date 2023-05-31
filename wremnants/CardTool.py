@@ -52,8 +52,8 @@ class CardTool(object):
         self.lumiScale = 1.
         self.project = None
         self.xnorm = False
-        self.chargeIdDict = {"minus" : {"val" : -1, "id" : "q0", "badId" : "q1"},
-                             "plus"  : {"val" : 1., "id" : "q1", "badId" : "q0"},
+        self.chargeIdDict = {"minus" : {"val" : -1, "id" : "qGen0", "badId" : "qGen1"},
+                             "plus"  : {"val" : 1., "id" : "qGen1", "badId" : "qGen0"},
                              "inclusive" : {"val" : "sum", "id" : "none", "badId" : None},
                              }
 
@@ -748,6 +748,8 @@ class CardTool(object):
             
     def writeHistByCharge(self, h, name, decorrCharge=False):
         for charge in self.channels:
+            if self.chargeIdDict[charge]["badId"] in name:
+                continue
             q = self.chargeIdDict[charge]["val"]
             hout = narf.hist_to_root(self.getBoostHistByCharge(h, q))
             hout.SetName(name+f"_{charge}")
@@ -772,6 +774,7 @@ class CardTool(object):
             if len(axes) < len(h.axes.name):
                 logger.debug(f"Projecting {h.axes.name} into {axes}")
                 h = h.project(*axes)
+
 
         if not self.nominalDim:
             self.nominalDim = h.ndim
