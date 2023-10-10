@@ -11,6 +11,7 @@ from wremnants.datasets.datasetDict_v9 import dataDictV9
 from wremnants.datasets.datasetDict_v8 import dataDictV8
 from wremnants.datasets.datasetDict_gen import genDataDict
 from wremnants.datasets.datasetDict_lowPU import dataDictLowPU
+from wremnants.datasets.datasetDict2018_v9 import dataDictV9_2018
 
 logger = logging.child_logger(__name__)
 
@@ -93,7 +94,12 @@ def excludeProcs(excludes, datasets):
     else:
         return datasets
 
-def getDatasetDict(mode=None, nanoVersion="v9"):
+def getDatasetDict(mode=None, nanoVersion="v9", dataYear=2016):
+    if dataYear == 2018:
+        dataDict = dataDictV9_2018
+        logger.info('Using NanoAOD V9 for 2018')
+        return dataDict
+
     if mode == "lowPU":
         return dataDictLowPU
 
@@ -143,12 +149,12 @@ def is_zombie(file_path):
         return True
 
 def getDatasets(maxFiles=-1, filt=None, excl=None, mode=None, base_path=None, nanoVersion="v9", 
-                data_tag="TrackFitV722_NanoProdv2", mc_tag="TrackFitV718_NanoProdv1", oneMCfileEveryN=None, checkFileForZombie=False):
+                data_tag="TrackFitV722_NanoProdv2", mc_tag="TrackFitV718_NanoProdv1", oneMCfileEveryN=None, checkFileForZombie=False, dataYear=2016):
     if not base_path:
         base_path = getDataPath(mode)
     logger.info(f"Loading 2016 samples from {base_path}.")
 
-    dataDict = getDatasetDict(mode, nanoVersion)
+    dataDict = getDatasetDict(mode, nanoVersion, dataYear)
 
     narf_datasets = []
     for sample,info in dataDict.items():
