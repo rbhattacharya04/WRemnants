@@ -121,6 +121,8 @@ axis_pt_utilityHist = hist.axis.Regular(6, 26, 56, name = "pt", overflow=False, 
 
 axis_met = hist.axis.Regular(100, 0., 200., name = "met", underflow=False, overflow=True)
 
+axis_recoWpt = hist.axis.Regular(40, 0., 80., name = "recoWpt", underflow=False, overflow=True)
+
 # define helpers
 muon_prefiring_helper, muon_prefiring_helper_stat, muon_prefiring_helper_syst = wremnants.make_muon_prefiring_helpers(era = era)
 
@@ -362,10 +364,15 @@ def build_graph(df, dataset):
         df = df.Alias("MET_corr_rec_pt", "MET_pt")
         df = df.Alias("MET_corr_rec_phi", "MET_phi")
 
+    df = df.Define("ptW", "wrem::pt_2(goodMuons_pt0, goodMuons_phi0 , MET_corr_rec_pt, MET_corr_rec_phi)")
+
     df = df.Define("transverseMass", "wrem::mt_2(goodMuons_pt0, goodMuons_phi0, MET_corr_rec_pt, MET_corr_rec_phi)")
     df = df.Define("hasCleanJet", "Sum(goodCleanJetsNoPt && Jet_pt > 30) >= 1")
 
     df = df.Define("deltaPhiMuonMet", "std::abs(wrem::deltaPhi(goodMuons_phi0,MET_corr_rec_phi))")
+        
+    df = df.Define("passMT", f"transverseMass >= {mtw_min}")
+    results.append(df.HistoBoost("ptW_dPhi", [axis_recoWpt, axis_eta_utilityHist, axis_pt_utilityHist, axis_charge, axis_passIso, axis_passMT, axis_dphi_fakes], ["ptW", "goodMuons_eta0", "goodMuons_pt0", "goodMuons_charge0", "passIso", "passMT", "deltaPhiMuonMet", "nominal_weight"]))
 
     if auxiliary_histograms: 
         # couple of histograms specific for tests with fakes
@@ -377,7 +384,6 @@ def build_graph(df, dataset):
         dphiMuonMetCut = args.dphiMuonMetCut * np.pi
         df = df.Filter(f"deltaPhiMuonMet > {dphiMuonMetCut}") # pi/4 was found to be a good threshold for signal with mT > 40 GeV
         
-    df = df.Define("passMT", f"transverseMass >= {mtw_min}")
 
     if auxiliary_histograms:
         # utility plot, mt and met, to plot them later (need eta-pt to make fakes)
