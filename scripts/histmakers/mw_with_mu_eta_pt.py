@@ -290,13 +290,19 @@ def build_graph(df, dataset):
     df = muon_selections.apply_met_filters(df)
     if args.makeMCefficiency:
         if dataset.group in common.background_MCprocs:
-            df = df.Define("GoodTrigObjs", "wrem::goodMuonTriggerCandidate(TrigObj_id,TrigObj_pt,TrigObj_l1pt,TrigObj_l2pt,TrigObj_filterBits)")
+            if era == "2016PostVFP":
+                df = df.Define("GoodTrigObjs", "wrem::goodMuonTriggerCandidate(TrigObj_id,TrigObj_pt,TrigObj_l1pt,TrigObj_l2pt,TrigObj_filterBits)")
+            else:
+                df = df.Define("GoodTrigObjs", "wrem::goodMuonTriggerCandidate2018(TrigObj_id,T    rigObj_pt,TrigObj_l1pt,TrigObj_l2pt,TrigObj_filterBits)")
         else:
-            df = df.Define("GoodTrigObjs", "wrem::goodMuonTriggerCandidate(TrigObj_id,TrigObj_filterBits)")
+            if era == "2016PostVFP":
+                df = df.Define("GoodTrigObjs", "wrem::goodMuonTriggerCandidate(TrigObj_id,TrigObj_filterBits)")
+            else:
+                df = df.Define("GoodTrigObjs", "wrem::goodMuonTriggerCandidate2018(TrigObj_id,T    rigObj_filterBits)")
         df = df.Define("passTrigger","(HLT_IsoTkMu24 || HLT_IsoMu24) && wrem::hasTriggerMatch(goodMuons_eta0,goodMuons_phi0,TrigObj_eta[GoodTrigObjs],TrigObj_phi[GoodTrigObjs])")
 
     else:
-        df = muon_selections.apply_triggermatching_muon(df, dataset, "goodMuons_eta0", "goodMuons_phi0")
+        df = muon_selections.apply_triggermatching_muon(df, dataset, "goodMuons_eta0", "goodMuons_phi0", era)
 
     # gen match to bare muons to select only prompt muons from MC processes, but also including tau decays
     # status flags in NanoAOD: https://cms-nanoaod-integration.web.cern.ch/autoDoc/NanoAODv9/2016ULpostVFP/doc_TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1.html

@@ -143,6 +143,32 @@ Vec_i goodMuonTriggerCandidate(const Vec_i& TrigObj_id, const Vec_i& TrigObj_fil
     return res;
 }
 
+Vec_i goodMuonTriggerCandidate2018(const Vec_i& TrigObj_id, const Vec_f& TrigObj_pt, const Vec_f& TrigObj_l1pt, const Vec_f& TrigObj_l2pt, const Vec_i& TrigObj_filterBits) {
+
+   Vec_i res(TrigObj_id.size(), 0); // initialize to 0
+   for (unsigned int i = 0; i < res.size(); ++i) {
+       if (TrigObj_id[i]  != 13 ) continue;
+       if (TrigObj_pt[i]   < 24.) continue;
+       if (TrigObj_l1pt[i] < 22.) continue;
+       if (!  (TrigObj_l2pt[i] > 10. && (TrigObj_filterBits[i] & 2) ))  continue;
+       res[i] = 1;
+   }
+   // res will be goodTrigObjs in RDF
+   // e.g. RDF::Define("goodTrigObjs","goodMuonTriggerCandidate(TrigObj_id,TrigObj_pt,TrigObj_l1pt,TrigObj_l2pt,TrigObj_filterBits)")
+   return res;
+}
+
+Vec_i goodMuonTriggerCandidate2018(const Vec_i& TrigObj_id, const Vec_i& TrigObj_filterBits) {
+
+    Vec_i res(TrigObj_id.size(), 0); // initialize to 0
+    for (unsigned int i = 0; i < res.size(); ++i) {
+        if (TrigObj_id[i]  != 13 ) continue;
+        if (!  (TrigObj_filterBits[i] & 4096) ) continue;
+        res[i] = 1;
+    }
+    return res;
+}
+
 Vec_i hasTriggerMatch(const Vec_f& eta, const Vec_f& phi, const Vec_f& TrigObj_eta, const Vec_f& TrigObj_phi) {
 
    Vec_i res(eta.size(), 0); // initialize to 0
